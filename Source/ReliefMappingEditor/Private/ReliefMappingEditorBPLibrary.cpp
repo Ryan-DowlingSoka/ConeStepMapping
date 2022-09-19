@@ -9,8 +9,3 @@ UReliefMappingEditorBPLibrary::UReliefMappingEditorBPLibrary(const FObjectInitia
 
 }
 
-float UReliefMappingEditorBPLibrary::ReliefMappingEditorSampleFunction(float Param)
-{
-	return -1;
-}
-

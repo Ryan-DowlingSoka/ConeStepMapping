@@ -2,19 +2,24 @@
 
 #include "ReliefMapping.h"
 
+#include "Interfaces/IPluginManager.h"
+
 #define LOCTEXT_NAMESPACE "FReliefMappingModule"
 
 void FReliefMappingModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-	
+	// Add shader directory
+	const TSharedPtr<IPlugin> ReliefMappingPlugin = IPluginManager::Get().FindPlugin(TEXT("ReliefMapping"));
+	if (ReliefMappingPlugin.IsValid())
+	{
+		const FString RealShaderDirectory = ReliefMappingPlugin->GetBaseDir() + TEXT("/Shaders/");
+		const FString VirtualShaderDirectory = TEXT("/Plugins/ReliefMapping");
+		AddShaderSourceDirectoryMapping(VirtualShaderDirectory, RealShaderDirectory);
+	}
 }
 
 void FReliefMappingModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
-	
 }
 
 #undef LOCTEXT_NAMESPACE
