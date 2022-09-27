@@ -1,0 +1,261 @@
+// MIT License
+//
+// Copyright (c) 2022 Ryan DowlingSoka
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include "ReliefMappingEditorContentBrowserExtensions.h"
+#include "Modules/ModuleManager.h"
+#include "Misc/PackageName.h"
+#include "Textures/SlateIcon.h"
+#include "Framework/Commands/UIAction.h"
+#include "Framework/MultiBox/MultiBoxExtender.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Engine/Texture2D.h"
+#include "IContentBrowserSingleton.h"
+#include "ContentBrowserModule.h"
+#include "EditorUtilitySubsystem.h"
+#include "EditorUtilityWidget.h"
+#include "EditorUtilityWidgetBlueprint.h"
+#include "ReliefMappingEditor.h"
+#include "ReliefMappingGeneratorInterface.h"
+#include "ReliefMapUserData.h"
+
+#define LOCTEXT_NAMESPACE "ReliefMappingEditor"
+
+DECLARE_LOG_CATEGORY_EXTERN(LogReliefMappingEditorCBExtensions, Log, All);
+DEFINE_LOG_CATEGORY(LogReliefMappingEditorCBExtensions);
+
+//////////////////////////////////////////////////////////////////////////
+
+static FContentBrowserMenuExtender_SelectedAssets ContentBrowserExtenderDelegate;
+static FDelegateHandle ContentBrowserExtenderDelegateHandle;
+
+//////////////////////////////////////////////////////////////////////////
+// FContentBrowserSelectedAssetExtensionBase
+
+struct FContentBrowserSelectedAssetExtensionBase
+{
+public:
+	TArray<struct FAssetData> SelectedAssets;
+
+public:
+	virtual void Execute() {}
+	virtual ~FContentBrowserSelectedAssetExtensionBase() {}
+};
+
+//////////////////////////////////////////////////////////////////////////
+// FGenerateReliefTexture
+
+#include "IAssetTools.h"
+#include "AssetToolsModule.h"
+
+struct FGenerateReliefTextureExtension : public FContentBrowserSelectedAssetExtensionBase
+{
+	EReliefMapping_Type Type;
+	bool bAutoSave;
+	
+	
+	FGenerateReliefTextureExtension()
+		: Type(RelaxedConeStepMap)
+		, bAutoSave(false) 
+	{}
+	
+	void GenerateReliefTextureFromAssets(const TArray<UTexture2D*>& Textures)
+	{
+		if(!GEditor)
+			return;
+		
+		const FAssetToolsModule& AssetToolsModule = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>("AssetTools");
+		const FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+		UEditorUtilityWidgetBlueprint* ReliefMapGenerator = Cast<UEditorUtilityWidgetBlueprint>(ReliefMappingPaths::ReliefMapGenerator.TryLoad());
+		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+		
+		const bool bBatchProcess = Textures.Num() > 1;
+		
+		for (auto TextureIt = Textures.CreateConstIterator(); TextureIt; ++TextureIt)
+		{
+			UTexture2D* Texture = *TextureIt;
+			UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(ReliefMapGenerator);
+			if(Widget->Implements<UReliefMappingGeneratorInterface>())
+			{
+				IReliefMappingGeneratorInterface::Execute_PopulateSettings(Widget, Type, Texture, bAutoSave);
+			}
+		}
+	}
+
+	virtual void Execute() override
+	{
+		// Create sprites for any selected textures
+		TArray<UTexture2D*> Textures;
+		for (auto AssetIt = SelectedAssets.CreateConstIterator(); AssetIt; ++AssetIt)
+		{
+			const FAssetData& AssetData = *AssetIt;
+			if (UTexture2D* Texture = Cast<UTexture2D>(AssetData.GetAsset()))
+			{
+				Textures.Add(Texture);
+			}
+		}
+
+		GenerateReliefTextureFromAssets(Textures);
+	}
+};
+
+//////////////////////////////////////////////////////////////////////////
+// FReliefMappingEditorContentBrowserExtensions_Impl
+
+class FReliefMappingEditorContentBrowserExtensions_Impl
+{
+public:
+	static void ExecuteSelectedContentFunctor(TSharedPtr<FContentBrowserSelectedAssetExtensionBase> SelectedAssetFunctor)
+	{
+		SelectedAssetFunctor->Execute();
+	}
+
+	static void CreateReliefMapActionsSubMenu(FMenuBuilder& MenuBuilder, TArray<FAssetData> SelectedAssets)
+	{
+		MenuBuilder.AddSubMenu(
+			LOCTEXT("ReliefMappingSubmenu", "Relief Map Actions"),
+			LOCTEXT("ReliefMappingSubmenuTooltip", "Relief Map Related Actions for this texture. RCSM, POM, etcetera."),
+			FNewMenuDelegate::CreateStatic(&FReliefMappingEditorContentBrowserExtensions_Impl::PopulateReliefMappingActionsMenu, SelectedAssets),
+			false,
+			FSlateIcon(FAppStyle::Get().GetStyleSetName(), "LandscapeEditor.NoiseTool")
+		);
+	}
+
+	static void PopulateReliefMappingActionsMenu(FMenuBuilder& MenuBuilder, TArray<FAssetData> SelectedAssets)
+	{
+		const FName ReliefMappingEditorStyleSetName = FAppStyle::Get().GetStyleSetName();
+		
+		// Create RCSM
+		TSharedPtr<FGenerateReliefTextureExtension> GenerateReliefTextureExtension = MakeShareable(new FGenerateReliefTextureExtension());
+		GenerateReliefTextureExtension->Type = RelaxedConeStepMap;
+		GenerateReliefTextureExtension->bAutoSave = true;
+		GenerateReliefTextureExtension->SelectedAssets = SelectedAssets;
+
+		const FUIAction Action_GenerateRelaxedConeStepMap(
+			FExecuteAction::CreateStatic(&FReliefMappingEditorContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>(GenerateReliefTextureExtension)));
+		
+		MenuBuilder.AddMenuEntry(
+			LOCTEXT("CB_Extension_Texture_GenerateRCSM", "Generate Relaxed Cone Step Map (RCSM)"),
+			LOCTEXT("CB_Extension_Texture_GenerateRCSM_Tooltip", "Precompute a Relaxed Cone Step Map from selected textures for efficient relief mapping."),
+			FSlateIcon(ReliefMappingEditorStyleSetName, "LandscapeEditor.NoiseTool"),
+			Action_GenerateRelaxedConeStepMap,
+			NAME_None,
+			EUserInterfaceActionType::Button);
+
+		// Create Height
+		TSharedPtr<FGenerateReliefTextureExtension> GenerateHeightTextureExtension = MakeShareable(new FGenerateReliefTextureExtension());
+		GenerateHeightTextureExtension->Type = HeightMap;
+		GenerateHeightTextureExtension->bAutoSave = true;
+		GenerateHeightTextureExtension->SelectedAssets = SelectedAssets;
+
+		const FUIAction Action_GenerateHeight(
+			FExecuteAction::CreateStatic(&FReliefMappingEditorContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>(GenerateHeightTextureExtension)));
+		
+		MenuBuilder.AddMenuEntry(
+			LOCTEXT("CB_Extension_Texture_GenerateHeight", "Generate Height Relief Map (POM)"),
+			LOCTEXT("CB_Extension_Texture_GenerateHeight_Tooltip", "Export a single channel heightmap from the given texture, allowing for adjustments."),
+			FSlateIcon(ReliefMappingEditorStyleSetName, "LandscapeEditor.NoiseTool"),
+			Action_GenerateHeight,
+			NAME_None,
+			EUserInterfaceActionType::Button);
+
+		// Create Height
+		TSharedPtr<FGenerateReliefTextureExtension> OpenReliefGeneratorExtension = MakeShareable(new FGenerateReliefTextureExtension());
+		OpenReliefGeneratorExtension->Type = HeightMap;
+		OpenReliefGeneratorExtension->bAutoSave = true;
+		OpenReliefGeneratorExtension->SelectedAssets = SelectedAssets;
+
+		const FUIAction Action_GenerateHeight(
+			FExecuteAction::CreateStatic(&FReliefMappingEditorContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>(OpenReliefGeneratorExtension)));
+		
+		MenuBuilder.AddMenuEntry(
+			LOCTEXT("CB_Extension_Texture_GenerateHeight", "Generate Height Relief Map (POM)"),
+			LOCTEXT("CB_Extension_Texture_GenerateHeight_Tooltip", "Export a single channel heightmap from the given texture, allowing for adjustments."),
+			FSlateIcon(ReliefMappingEditorStyleSetName, "LandscapeEditor.NoiseTool"),
+			Action_GenerateHeight,
+			NAME_None,
+			EUserInterfaceActionType::Button);
+		
+	}
+
+	static TSharedRef<FExtender> OnExtendContentBrowserAssetSelectionMenu(const TArray<FAssetData>& SelectedAssets)
+	{
+		TSharedRef<FExtender> Extender(new FExtender());
+
+		// Temp, only support one at a time right now.
+		if(SelectedAssets.Num()>1)
+		{
+			return Extender;
+		}
+		
+		// Run thru the assets to determine if any meet our criteria
+		bool bAnyTextures = false;
+		for (auto AssetIt = SelectedAssets.CreateConstIterator(); AssetIt; ++AssetIt)
+		{
+			const FAssetData& Asset = *AssetIt;
+			if(Asset.AssetClass == UTexture2D::StaticClass()->GetFName())
+			{
+				bAnyTextures = true;
+				break;
+			}
+		}
+
+		if (bAnyTextures)
+		{
+			// Add the sprite actions sub-menu extender
+			Extender->AddMenuExtension(
+				"GetAssetActions",
+				EExtensionHook::After,
+				nullptr,
+				FMenuExtensionDelegate::CreateStatic(&FReliefMappingEditorContentBrowserExtensions_Impl::CreateReliefMapActionsSubMenu, SelectedAssets));
+		}
+
+		return Extender;
+	}
+
+	static TArray<FContentBrowserMenuExtender_SelectedAssets>& GetExtenderDelegates()
+	{
+		FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser"));
+		return ContentBrowserModule.GetAllAssetViewContextMenuExtenders();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////////
+// FReliefMappingEditorContentBrowserExtensions
+
+void FReliefMappingEditorContentBrowserExtensions::InstallHooks()
+{
+	ContentBrowserExtenderDelegate = FContentBrowserMenuExtender_SelectedAssets::CreateStatic(&FReliefMappingEditorContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelectionMenu);
+
+	TArray<FContentBrowserMenuExtender_SelectedAssets>& CBMenuExtenderDelegates = FReliefMappingEditorContentBrowserExtensions_Impl::GetExtenderDelegates();
+	CBMenuExtenderDelegates.Add(ContentBrowserExtenderDelegate);
+	ContentBrowserExtenderDelegateHandle = CBMenuExtenderDelegates.Last().GetHandle();
+}
+
+void FReliefMappingEditorContentBrowserExtensions::RemoveHooks()
+{
+	TArray<FContentBrowserMenuExtender_SelectedAssets>& CBMenuExtenderDelegates = FReliefMappingEditorContentBrowserExtensions_Impl::GetExtenderDelegates();
+	CBMenuExtenderDelegates.RemoveAll([](const FContentBrowserMenuExtender_SelectedAssets& Delegate){ return Delegate.GetHandle() == ContentBrowserExtenderDelegateHandle; });
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+#undef LOCTEXT_NAMESPACE

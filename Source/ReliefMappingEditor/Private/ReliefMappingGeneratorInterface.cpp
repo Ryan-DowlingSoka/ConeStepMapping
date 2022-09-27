@@ -20,20 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "ReliefMappingGeneratorInterface.h"
 
-#include "Modules/ModuleManager.h"
 
-namespace ReliefMappingPaths
+UReliefMappingGeneratorInterface::UReliefMappingGeneratorInterface(FObjectInitializer const& InOI)
+	: UInterface(InOI)
 {
-	static FSoftObjectPath ReliefMapGenerator = FSoftObjectPath("/ReliefMapping/MapGenerator/ReliefMapGenerator.ReliefMapGenerator");
 }
-
-class FReliefMappingEditorModule : public IModuleInterface
-{
-public:
-
-	/** IModuleInterface implementation */
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-};

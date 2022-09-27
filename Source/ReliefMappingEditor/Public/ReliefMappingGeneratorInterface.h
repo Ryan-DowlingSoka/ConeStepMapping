@@ -22,18 +22,27 @@
 
 #pragma once
 
-#include "Modules/ModuleManager.h"
+#include "CoreMinimal.h"
+#include "UObject/Interface.h"
+#include "ReliefMapUserData.h"
+#include "ReliefMappingGeneratorInterface.generated.h"
 
-namespace ReliefMappingPaths
+// This class does not need to be modified.
+UINTERFACE()
+class UReliefMappingGeneratorInterface : public UInterface
 {
-	static FSoftObjectPath ReliefMapGenerator = FSoftObjectPath("/ReliefMapping/MapGenerator/ReliefMapGenerator.ReliefMapGenerator");
-}
+	GENERATED_UINTERFACE_BODY()
+};
 
-class FReliefMappingEditorModule : public IModuleInterface
+/**
+ * Interface to allow control of the Relief Map Generator Widget from C++.
+ */
+class RELIEFMAPPINGEDITOR_API IReliefMappingGeneratorInterface : public IInterface
 {
+	GENERATED_IINTERFACE_BODY()
+
+	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-
-	/** IModuleInterface implementation */
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Relief Mapping")
+	void PopulateSettings(EReliefMapping_Type Type, UTexture2D* Heightmap, bool bAutoSave);
 };

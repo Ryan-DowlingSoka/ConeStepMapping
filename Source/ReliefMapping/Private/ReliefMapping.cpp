@@ -3,6 +3,7 @@
 #include "ReliefMapping.h"
 
 #include "Interfaces/IPluginManager.h"
+#include "ShaderCore.h"
 
 #define LOCTEXT_NAMESPACE "FReliefMappingModule"
 

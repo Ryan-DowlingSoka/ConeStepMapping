@@ -34,11 +34,19 @@ public class ReliefMappingEditor : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AssetRegistry", 
+				"Blutility",
+				"ContentBrowser",
 				"CoreUObject",
+				"EditorScriptingUtilities",
+				"EditorStyle",
 				"Engine",
+				"ReliefMapping",
 				"Slate",
 				"SlateCore",
 				"UnrealEd",
+				"UMGEditor",
+				"UMG",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

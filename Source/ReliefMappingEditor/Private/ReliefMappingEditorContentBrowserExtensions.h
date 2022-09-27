@@ -22,18 +22,11 @@
 
 #pragma once
 
-#include "Modules/ModuleManager.h"
+#include "CoreMinimal.h"
 
-namespace ReliefMappingPaths
-{
-	static FSoftObjectPath ReliefMapGenerator = FSoftObjectPath("/ReliefMapping/MapGenerator/ReliefMapGenerator.ReliefMapGenerator");
-}
-
-class FReliefMappingEditorModule : public IModuleInterface
+class FReliefMappingEditorContentBrowserExtensions
 {
 public:
-
-	/** IModuleInterface implementation */
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
+	static void InstallHooks();
+	static void RemoveHooks();
 };
