@@ -160,17 +160,17 @@ public:
 		// Create Height
 		TSharedPtr<FGenerateReliefTextureExtension> OpenReliefGeneratorExtension = MakeShareable(new FGenerateReliefTextureExtension());
 		OpenReliefGeneratorExtension->Type = HeightMap;
-		OpenReliefGeneratorExtension->bAutoSave = true;
+		OpenReliefGeneratorExtension->bAutoSave = false;
 		OpenReliefGeneratorExtension->SelectedAssets = SelectedAssets;
 
-		const FUIAction Action_GenerateHeight(
+		const FUIAction Action_OpenWidget(
 			FExecuteAction::CreateStatic(&FReliefMappingEditorContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>(OpenReliefGeneratorExtension)));
 		
 		MenuBuilder.AddMenuEntry(
-			LOCTEXT("CB_Extension_Texture_GenerateHeight", "Generate Height Relief Map (POM)"),
-			LOCTEXT("CB_Extension_Texture_GenerateHeight_Tooltip", "Export a single channel heightmap from the given texture, allowing for adjustments."),
+			LOCTEXT("CB_Extension_Texture_OpenWidget", "Open the Relief Map Generator Widget"),
+			LOCTEXT("CB_Extension_Texture_OpenWidget_Tooltip", "Opens the relief map generator widget with the selected texture as the heightmap, but without auto-save enabled."),
 			FSlateIcon(ReliefMappingEditorStyleSetName, "LandscapeEditor.NoiseTool"),
-			Action_GenerateHeight,
+			Action_OpenWidget,
 			NAME_None,
 			EUserInterfaceActionType::Button);
 		
