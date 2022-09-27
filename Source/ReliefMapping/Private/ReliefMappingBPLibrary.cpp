@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright (c) 2022 Ryan DowlingSoka
 
 #include "ReliefMappingBPLibrary.h"
 #include "ReliefMapping.h"
