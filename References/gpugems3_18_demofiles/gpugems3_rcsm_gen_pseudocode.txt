@@ -1,0 +1,13 @@
+ for each reference texel ti do
+    radius_cone_C(i) = 1;
+    source.xyz = (ti.texCoord.s, ti.texCoord.t, 0.0);
+    for each destination texel tj do
+        destination.xyz = (tj.texCoord.s, tj.texCoord.t, tj.depth);
+        ray.origin = destination;
+        ray.direction = destination - source;
+        (k,w) = text_cords_next_intersection(tj, ray, depth_map);
+        d = depth_stored_at(k,w);
+        if ((d  - ti.depth) > 0.0)  // dst has to be above the src
+            cone_ratio(i,j) = length(source.xy - destination.xy) / (d - tj.depth);
+        if (radius_cone_C(i) > cone_ratio(i,j))
+            radius_cone_C(i) = cone_ratio(i,j); 

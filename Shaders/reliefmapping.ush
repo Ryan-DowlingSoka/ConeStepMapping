@@ -1,0 +1,279 @@
+/*
+ * Utilties
+ */
+float invlerp( float a, float b, float v )
+{
+    return saturate((v-a) / (b-a));
+}
+
+float2 invlerp( float2 a, float2 b, float2 v )
+{
+    return saturate((v-a) / (b-a));
+}
+
+float3 invlerp( float3 a, float3 b, float3 v )
+{
+    return saturate((v-a) / (b-a));
+}
+
+float4 invlerp( float4 a, float4 b, float4 v )
+{
+    return saturate((v-a) / (b-a));
+}
+
+/* 
+ * Relaxed Conestep Mapping as described by GPUGems3 Chapter 18.
+ * https://developer.nvidia.com/gpugems/gpugems3/part-iii-rendering/chapter-18-relaxed-cone-stepping-relief-mapping
+ */
+
+void setup_ray(
+    float2 texcoord,
+    float3 camera_vector,
+    // bool depth_bias,
+    float depth,
+    out float3 p,
+    out float3 v)
+{
+	p = float3(texcoord,0);
+	v = normalize(camera_vector);
+	
+	v.z = abs(v.z);
+
+	// if (depth_bias)
+	// {
+	// 	float db = 1.0-v.z; db*=db; db*=db; db=1.0-db*db;
+	// 	v.xy *= db;
+	// }
+	
+	v.xy *= depth;
+}
+
+void ray_intersect_relaxedcone(
+    Texture2D<float4> relaxedcone_relief_map,
+    SamplerState relaxedcone_relief_map_sampler,
+    float2 in_ddx,
+    float2 in_ddy,
+    int height_map_channel,
+    int conestep_map_channel,
+    int cone_steps,
+    int binary_steps,
+    inout float3 p,
+	inout float3 v)
+{
+	float3 p0 = p;
+
+	v /= v.z;
+	
+	float dist = length(v.xy);
+	
+	for( int i=0;i<cone_steps;i++ )
+	{
+		float4 tex = relaxedcone_relief_map.SampleGrad(relaxedcone_relief_map_sampler, p.xy, in_ddx, in_ddy);
+
+		float height = saturate((1-tex[height_map_channel]) - p.z);
+		
+		float cone_ratio = tex[conestep_map_channel];
+		
+		p += v * (cone_ratio * height / (dist + cone_ratio));
+	}
+
+	v *= p.z*0.5;
+	p = p0 + v;
+
+	for( int j=0;j<binary_steps;j++ )
+	{
+		float4 tex = relaxedcone_relief_map.SampleGrad(relaxedcone_relief_map_sampler, p.xy, in_ddx, in_ddy);
+		v *= 0.5;
+		if (p.z<(1-tex[height_map_channel]))
+			p+=v;
+		else
+			p-=v;
+	}
+    p = p - p0;
+}
+
+float4 relief_map_relaxedcone(
+    Texture2D<float4> texture2d, 
+    SamplerState texture_sampler, 
+    float2 texcoord, 
+    float2 in_ddx, 
+    float2 in_ddy, 
+    int height_map_channel, 
+    int conestep_map_channel,
+    int cone_steps,
+    int binary_steps,
+    float3 camera_vector, 
+    // bool depth_bias, 
+    float depth)
+{
+    float3 p;
+    float3 v;
+    setup_ray(
+        texcoord,
+        camera_vector,
+        //depth_bias,
+        depth,
+        /*out*/ p,
+        /*out*/ v
+    );
+    ray_intersect_relaxedcone(
+        texture2d,
+        texture_sampler,
+        in_ddx,
+        in_ddy,
+        height_map_channel,
+        conestep_map_channel,
+        cone_steps,
+        binary_steps,
+        /*inout*/ p, 
+        /*inout*/ v
+    );
+    return(float4(p,1));
+}
+
+/*
+ * Parallax Occlusion Mapping adapted from GPUGems3 Chapter 18.
+ * https://developer.nvidia.com/gpugems/gpugems3/part-iii-rendering/chapter-18-relaxed-cone-stepping-relief-mapping
+ */
+
+void ray_intersect_pom(
+    Texture2D height_relief_map,
+    SamplerState height_relief_map_sampler,
+    float2 in_ddx,
+    float2 in_ddy,
+    int height_map_channel,
+    int binary_steps,
+    float height_map_min,
+    float height_map_max,
+    inout float3 p,
+    inout float3 v)
+{
+    int regular_steps = binary_steps-8;
+    float3 p0 = p;
+    float min_height = (1-height_map_min);
+
+    v /= v.z;
+    float3 v_reg = v/regular_steps;// * min_height;
+    
+
+    for( int j=0; j<regular_steps; j++)
+    {
+        float4 tex = height_relief_map.SampleGrad(height_relief_map_sampler, p.xy, in_ddx, in_ddy);
+        if(p.z<(1-tex[height_map_channel]))
+            p += v_reg;
+        else
+            break;
+    }
+    //p = p - p0;
+    //return;
+
+    v *= p.z*0.5;// /min_height;
+	p = p0 + v;
+
+	for( int j=0;j<8;j++ )
+	{
+		float4 tex = height_relief_map.SampleGrad(height_relief_map_sampler, p.xy, in_ddx, in_ddy);
+		v *= 0.5;
+		if (p.z<(1-tex[height_map_channel]))
+			p+=v;
+		else
+			p-=v;
+	}
+    p = p - p0;
+}
+
+float4 relief_map_pom(
+    Texture2D<float4> texture2d, 
+    SamplerState texture_sampler, 
+    float2 texcoord, 
+    float2 in_ddx, 
+    float2 in_ddy, 
+    int height_map_channel,
+    int binary_steps,
+    float3 camera_vector, 
+    // bool depth_bias, 
+    float depth,
+    float height_map_min,
+    float height_map_max)
+{
+    float3 p;
+    float3 v;
+    setup_ray(
+        texcoord,
+        camera_vector,
+        //depth_bias,
+        depth,
+        /*out*/ p,
+        /*out*/ v
+    );
+    ray_intersect_pom(
+        texture2d,
+        texture_sampler,
+        in_ddx,
+        in_ddy,
+        height_map_channel,
+        binary_steps,
+        height_map_min,
+        height_map_max,
+        /*inout*/ p, 
+        /*inout*/ v
+    );
+    return(float4(p,1));
+}
+
+/*
+ * Height Manipulation Visualizations 
+ */
+
+float height_adjustments(
+    float height,
+    float black_point,
+    float white_point,
+    float floor,
+    float ceiling,
+    float bias
+)
+{
+    float height0 = height;
+
+    height = invlerp(black_point, white_point, height);
+    height = lerp(floor, ceiling, height);
+    height += bias;
+    height = saturate(height);
+    return height;
+}
+
+float4 preview_height(
+    Texture2D<float4> texture2d,
+    SamplerState texture_sampler,
+    float2 texcoord,
+    float start_percentage,
+    int height_channel,
+    int num_previews,
+    float black_point,
+    float white_point,
+    float floor,
+    float ceiling,
+    float bias
+)
+{
+    float column = start_percentage;
+    float iteration_adjustment = 0;
+
+    float4 c = float4(0,0,0,0);
+
+    float2 uv = float2(column, texcoord.x);
+
+    for( int i = num_previews; i >= 0; i--)
+    {
+        float4 tex = texture2d.SampleLevel(texture_sampler, float2(uv.x + (float(i) / float(num_previews)), uv.y), 0);
+        float height = tex[height_channel];
+        height = height_adjustments(height, black_point, white_point, floor, ceiling, bias);
+        float dist = distance((1-texcoord.y) + (iteration_adjustment * i), height);
+        float area = smoothstep(0.01, 0.00, (1-texcoord.y) - height);
+        float opacity = pow((1 - (float(i) / num_previews)),2) * 0.2;// * (/*smoothstep(0.015, 0.01, dist) +*/ area * 0.2);
+        c.rgb = lerp(c.rgb, opacity, area);
+        c.a += area * opacity * 5.0;
+    }
+    return c;
+}
