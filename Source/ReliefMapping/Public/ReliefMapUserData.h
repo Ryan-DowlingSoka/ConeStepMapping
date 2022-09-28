@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "Engine/AssetUserData.h"
 #include "ReliefMapUserData.generated.h"
 
 UENUM(BlueprintType)
@@ -76,7 +77,7 @@ public:
 	TEnumAsByte<EReliefMapping_Type> ReliefMapType = EReliefMapping_Type::RelaxedConeStepMap;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ReliefMapping")
-	TSoftObjectPtr<UTexture2D> HeightMap = nullptr;
+	TSoftObjectPtr<class UTexture2D> HeightMap = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ReliefMapping")
 	TEnumAsByte<EReliefMapping_LinearColorChannels> HeightMapChannel = EReliefMapping_LinearColorChannels::R;
