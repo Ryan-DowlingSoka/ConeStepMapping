@@ -11,7 +11,7 @@ RCSM (described by Nvidia GPU Gems 3 : Chapter 18) provides a method for creatin
 
 This plugin wraps up the efficiency and behaviors of RCSM into an all in one package for generating these helper textures, but with a focus on production ready workflows.
 
-### Features:
+## Features:
 * Right-Click Menu on texture assets to generate RCSM or Height maps.
 * Modify height-maps at interactive framerates with novel cross-section preview.
 * Progress Bars, Auto-save, channel previews and more UX features.
@@ -25,10 +25,10 @@ This plugin wraps up the efficiency and behaviors of RCSM into an all in one pac
 * Example Decal and Megascans materials to learn from.
 
 
-# Documentation:
-https://github.com/Ryan-DowlingSoka/ReliefMapping/wiki/Get-Relief!-Wiki
+## Documentation:
+https://github.com/Ryan-DowlingSoka/ReliefMappingWiki/wiki/Get-Relief!
 
-# Licensing:
+## Licensing:
 This software is available for purchase through the Epic Games Store Marketplace.
 
 For alternative licensing, contact me directly ryan[at]dowlingsoka.com
