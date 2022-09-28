@@ -82,10 +82,10 @@ public:
 	TEnumAsByte<EReliefMapping_LinearColorChannels> HeightMapChannel = EReliefMapping_LinearColorChannels::R;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ReliefMapping")
-	TEnumAsByte<EReliefMapping_CommonSizes> CommonResolutions = EReliefMapping_CommonSizes::RMC_128x128;
+	TEnumAsByte<EReliefMapping_CommonSizes> CommonResolutions = EReliefMapping_CommonSizes::RMC_256x256;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ReliefMapping")
-	FIntPoint Resolution = FIntPoint(128,128);
+	FIntPoint Resolution = FIntPoint(256,256);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ReliefMapping")
 	int IterationBucketSize = 1;
