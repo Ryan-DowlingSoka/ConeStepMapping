@@ -30,4 +30,5 @@ https://github.com/Ryan-DowlingSoka/ReliefMapping/wiki/Get-Relief!-Wiki
 
 # Licensing:
 This software is available for purchase through the Epic Games Store Marketplace.
+
 For alternative licensing, contact me directly ryan[at]dowlingsoka.com
