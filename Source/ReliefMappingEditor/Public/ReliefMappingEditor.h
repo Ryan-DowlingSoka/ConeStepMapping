@@ -6,7 +6,7 @@
 
 namespace ReliefMappingPaths
 {
-	static FSoftObjectPath ReliefMapGenerator = FSoftObjectPath("/ReliefMapping/MapGenerator/ReliefMapGenerator.ReliefMapGenerator");
+	static FSoftObjectPath ReliefMapGenerator = FSoftObjectPath("/ReliefMapping/ReliefMapping/MapGenerator/ReliefMapGenerator.ReliefMapGenerator");
 }
 
 class FReliefMappingEditorModule : public IModuleInterface

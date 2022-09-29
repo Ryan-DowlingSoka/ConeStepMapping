@@ -1,4 +1,4 @@
-// Some copyright should be here...
+// Copyright (c) 2022 Ryan DowlingSoka
 
 using UnrealBuildTool;
 

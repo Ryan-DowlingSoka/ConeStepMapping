@@ -6,9 +6,9 @@
 	"Description": "Plugin for Unreal Engine 5 to generate Relaxed Cone Step Maps and Anisotropic Cone Step Maps for relief mapping.",
 	"Category": "Other",
 	"CreatedBy": "Ryan DowlingSoka",
-	"CreatedByURL": "https://github.com/Ryan-DowlingSoka/ReliefMapping",
-	"DocsURL": "https://github.com/Ryan-DowlingSoka/ReliefMappingWiki",
-	"MarketplaceURL": "",
+	"CreatedByURL": "www.ryandowlingsoka.com",
+	"DocsURL": "https://github.com/Ryan-DowlingSoka/ReliefMappingWiki/wiki/Get-Relief!",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/47cefc1203a142c7bb5027c194bee325",
 	"SupportURL": "",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
@@ -19,12 +19,14 @@
 		{
 			"Name": "ReliefMapping",
 			"Type": "Runtime",
-			"LoadingPhase": "PreLoadingScreen"
+			"LoadingPhase": "PreLoadingScreen",
+			"PlatformAllowList": ["Win64", "Mac", "Linux"]
 		},
 		{
 			"Name": "ReliefMappingEditor",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"PlatformAllowList": ["Win64", "Mac", "Linux"]
 		}
 	],
 	"Plugins": [
