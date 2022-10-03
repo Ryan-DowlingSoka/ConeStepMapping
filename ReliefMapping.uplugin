@@ -36,5 +36,11 @@
 				"Linux"
 			]
 		}
+	],
+	"Plugins": [
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		}
 	]
 }
