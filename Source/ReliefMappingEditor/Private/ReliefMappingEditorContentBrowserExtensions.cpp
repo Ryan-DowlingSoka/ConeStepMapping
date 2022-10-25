@@ -188,10 +188,17 @@ public:
 		
 		// Run thru the assets to determine if any meet our criteria
 		bool bAnyTextures = false;
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+		const auto Texture2DClassPathName = UTexture2D::StaticClass()->GetClassPathName();
+#endif
 		for (auto AssetIt = SelectedAssets.CreateConstIterator(); AssetIt; ++AssetIt)
 		{
 			const FAssetData& Asset = *AssetIt;
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+			if(Asset.AssetClassPath == Texture2DClassPathName)
+#else
 			if(Asset.AssetClass == UTexture2D::StaticClass()->GetFName())
+#endif
 			{
 				bAnyTextures = true;
 				break;

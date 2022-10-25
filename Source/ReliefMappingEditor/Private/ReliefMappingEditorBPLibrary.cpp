@@ -48,7 +48,11 @@ bool UReliefMappingEditorBPLibrary::FindOptionalAssetData(FString AssetPath, FAs
 	//TArray<FString> Paths;
 	//Paths.Add(PackagePath);
 	//AssetRegistryModule.Get().ScanFilesSynchronous(Paths);
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+	AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(*AssetPath));
+#else
 	AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(*AssetPath);
+#endif
 	return AssetData.IsValid();
 }
 
