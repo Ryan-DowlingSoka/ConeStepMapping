@@ -7,6 +7,7 @@
 
 #include "ReliefMappingEditor.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Interfaces/IPluginManager.h"
 
 UReliefMappingEditorBPLibrary::UReliefMappingEditorBPLibrary(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
@@ -143,5 +144,11 @@ void UReliefMappingEditorBPLibrary::EndSilentOperation(FSilentOperationContext& 
 	GIsSilent = SilentOperationContext.CachedGIsSilent;
 }
 
+FString UReliefMappingEditorBPLibrary::GetReliefVersionString()
+{
+	const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(ReliefMappingPaths::ReliefMapPluginString);
+	const FPluginDescriptor& PluginDescriptor = Plugin->GetDescriptor();
+	return PluginDescriptor.VersionName;
+}
 
 

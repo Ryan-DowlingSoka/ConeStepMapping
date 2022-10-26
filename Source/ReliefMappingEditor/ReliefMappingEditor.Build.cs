@@ -41,6 +41,7 @@ public class ReliefMappingEditor : ModuleRules
 				"EditorScriptingUtilities",
 				"EditorStyle",
 				"Engine",
+				"Projects",
 				"ReliefMapping",
 				"Slate",
 				"SlateCore",

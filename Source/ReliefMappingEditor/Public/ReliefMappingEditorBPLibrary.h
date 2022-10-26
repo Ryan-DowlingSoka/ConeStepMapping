@@ -59,4 +59,7 @@ class UReliefMappingEditorBPLibrary : public UBlueprintFunctionLibrary
 
 	UFUNCTION(BlueprintCallable, Category="EditorScripting")
 	static void EndSilentOperation(UPARAM(ref) FSilentOperationContext& SilentOperationContext);
+
+	UFUNCTION(BlueprintCallable, Category="GetRelief")
+	static FString GetReliefVersionString();
 };
