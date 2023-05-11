@@ -1,21 +1,23 @@
 // Copyright (c) 2022 Ryan DowlingSoka
 
 #include "ReliefMappingEditorContentBrowserExtensions.h"
-#include "Modules/ModuleManager.h"
-#include "Misc/PackageName.h"
-#include "Textures/SlateIcon.h"
-#include "Framework/Commands/UIAction.h"
-#include "Framework/MultiBox/MultiBoxExtender.h"
-#include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "Engine/Texture2D.h"
-#include "IContentBrowserSingleton.h"
 #include "ContentBrowserModule.h"
+#include "Editor.h"
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
+#include "IContentBrowserSingleton.h"
 #include "ReliefMappingEditor.h"
 #include "ReliefMappingGeneratorInterface.h"
 #include "ReliefMapUserData.h"
+#include "Engine/Texture2D.h"
+#include "Framework/Commands/UIAction.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Framework/MultiBox/MultiBoxExtender.h"
+#include "Misc/PackageName.h"
+#include "Modules/ModuleManager.h"
+#include "Runtime/Launch/Resources/Version.h"
+#include "Textures/SlateIcon.h"
 
 #define LOCTEXT_NAMESPACE "ReliefMappingEditor"
 
@@ -43,8 +45,8 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // FGenerateReliefTexture
 
-#include "IAssetTools.h"
 #include "AssetToolsModule.h"
+#include "IAssetTools.h"
 
 struct FGenerateReliefTextureExtension : public FContentBrowserSelectedAssetExtensionBase
 {

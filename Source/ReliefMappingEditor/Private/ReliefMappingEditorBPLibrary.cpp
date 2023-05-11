@@ -2,12 +2,15 @@
 
 #include "ReliefMappingEditorBPLibrary.h"
 
+#include "CoreMinimal.h"
 #include "EditorAssetLibrary.h"
-#include "ReliefMapUserData.h"
-
 #include "ReliefMappingEditor.h"
+#include "ReliefMapUserData.h"
+#include "AssetRegistry/AssetData.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Engine/Texture2D.h"
 #include "Interfaces/IPluginManager.h"
+#include "Launch/Resources/Version.h"
 
 UReliefMappingEditorBPLibrary::UReliefMappingEditorBPLibrary(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)

@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
 	"Version": 4,
-	"VersionName": "1.2.0",
+	"VersionName": "1.2.1",
 	"FriendlyName": "Get Relief! (Relief Mapping)",
 	"Description": "Plugin for Unreal Engine 5 to generate Relaxed Cone Step Maps and Anisotropic Cone Step Maps for relief mapping.",
 	"Category": "Rendering",

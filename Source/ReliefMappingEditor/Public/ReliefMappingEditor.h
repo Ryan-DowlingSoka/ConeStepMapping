@@ -2,7 +2,10 @@
 
 #pragma once
 
+#include "Containers/UnrealString.h"
 #include "Modules/ModuleManager.h"
+#include "UObject/NameTypes.h"
+#include "UObject/SoftObjectPath.h"
 
 namespace ReliefMappingPaths
 {

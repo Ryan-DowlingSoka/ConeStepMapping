@@ -2,8 +2,14 @@
 
 #pragma once
 
+#include "AssetRegistry/AssetData.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ReliefMappingEditorBPLibrary.generated.h"
+
+struct FLinearColor;
+struct FSilentOperationContext;
+class FString;
+class UTexture2D;
 
 USTRUCT(BlueprintType)
 struct FSilentOperationContext

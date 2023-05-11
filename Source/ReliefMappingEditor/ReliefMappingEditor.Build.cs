@@ -4,7 +4,7 @@ using UnrealBuildTool;
 
 public class ReliefMappingEditor : ModuleRules
 {
-	public ReliefMappingEditor(ReadOnlyTargetRules Target) : base(Target)
+	public ReliefMappingEditor(ReadOnlyTargetRules target) : base(target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
