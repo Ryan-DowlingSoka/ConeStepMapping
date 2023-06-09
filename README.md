@@ -28,7 +28,5 @@ This plugin wraps up the efficiency and behaviors of RCSM into an all in one pac
 ## Documentation:
 [Get Relief! Public Wiki](https://github.com/Ryan-DowlingSoka/ReliefMappingWiki/wiki/Get-Relief!)
 
-## Licensing:
-This software is available for purchase through the Epic Games Store Marketplace.
-
-For alternative licensing, contact me directly ryan[at]dowlingsoka.com
+## Support:
+Contact me at support@dowlingsoka.com
