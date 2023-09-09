@@ -10,7 +10,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/Texture2D.h"
 #include "Interfaces/IPluginManager.h"
-#include "Launch/Resources/Version.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 UReliefMappingEditorBPLibrary::UReliefMappingEditorBPLibrary(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
