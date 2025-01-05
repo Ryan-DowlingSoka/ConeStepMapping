@@ -6,11 +6,13 @@
 #include "EditorAssetLibrary.h"
 #include "ReliefMappingEditor.h"
 #include "ReliefMapUserData.h"
+#include "TextureCompiler.h"
 #include "AssetRegistry/AssetData.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/Texture2D.h"
 #include "Interfaces/IPluginManager.h"
 #include "Runtime/Launch/Resources/Version.h"
+#include "Streaming/TextureMipDataProvider.h"
 
 UReliefMappingEditorBPLibrary::UReliefMappingEditorBPLibrary(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
@@ -66,13 +68,21 @@ void UReliefMappingEditorBPLibrary::GetMinMaxTexture2DValuesPerChannel(
 	FLinearColor& OutMin,
 	FLinearColor& OutMax)
 {
+	FTextureCompilingManager::Get().FinishCompilation({Texture});
+	OutMin = FLinearColor(0,0,0,0);
+	OutMax = FLinearColor(1,1,1,1);
+	
 	if(Texture == nullptr)
 	{
-		OutMin = FLinearColor(0,0,0,0);
-		OutMax = FLinearColor(1,1,1,1);
 		return;
 	}
-	FTextureSource TextureSource = Texture->Source;
+	
+	FTextureSource& TextureSource = Texture->Source;
+	if (!TextureSource.IsValid())
+	{
+		return;
+	}
+	
 	TArray64<uint8> TextureRawData;
 	TextureSource.GetMipData(TextureRawData, 0);
 
