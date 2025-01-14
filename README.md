@@ -26,7 +26,7 @@ This plugin wraps up the efficiency and behaviors of RCSM into an all in one pac
 
 
 ## Documentation:
-[Get Relief! Public Wiki](https://github.com/Ryan-DowlingSoka/ReliefMappingWiki/wiki/)
+[Get Relief! Public Wiki](https://github.com/Ryan-DowlingSoka/ReliefMapping/wiki/)
 
 ## Support:
 Contact me at support@dowlingsoka.com
